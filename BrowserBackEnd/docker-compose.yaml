@@ -1,0 +1,22 @@
+version: '3.7'
+
+services: 
+  back-end:
+    build: 
+      context: .
+    ports: 
+      - 5001:80
+      - 5002:443
+    environment:
+      - USE_HTTPS=true
+
+
+      
+      
+
+
+
+
+
+
+        

@@ -1,0 +1,7 @@
+.vscode/
+*.csv
+*.json
+*.png
+
+BrowserBackEnd/FTPUploads/bin/
+BrowserBackEnd/FTPUploads/obj/

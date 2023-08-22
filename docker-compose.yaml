@@ -1,0 +1,50 @@
+version: "3.7"
+services: 
+  # database:
+  #   image: mysql
+  #   restart: always
+  #   networks:
+  #     - dippa
+  #   ports:
+  #     - 3306:3306
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: mysql
+  #     MYSQL_USER: renita
+  #     MYSQL_PASSWORD: renita_pass
+
+  # phpmyadmin:
+  #   image: phpmyadmin/phpmyadmin
+  #   restart: always
+  #   depends_on:
+  #     - database
+  #   networks:
+  #     - dippa
+  #   ports:
+  #     - 8080:80
+  #   environment:
+  #     PMA_HOST: database
+  #     PMA_USER: root
+  #     PMA_PASSWORD: mysql
+
+  browser-back-end:
+    build: ./BrowserBackEnd
+    networks:
+      - dippa
+    ports:
+      - 44376:80
+      - 44377:443
+    environment: 
+      USE_HTTPS: "true"
+
+  # browser-client:
+  #   build: 
+  #     context: ./browser-client
+  #     args:
+  #       REACT_APP_BACK_END_URL_ARG: http://localhost:44305/
+  #   networks:
+  #     - dippa
+  #   ports:
+  #     - 4200:80
+
+networks:
+  dippa:

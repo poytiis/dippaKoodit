@@ -1,0 +1,7 @@
+/BrowserBackEnd/bin/
+/BrowserBackEnd/obj/
+/BrowserBackEnd/appsettings.Secrets.json
+/.vs
+/BrowserBackEnd/FTPUploads/secrets.json
+/BrowserBackEnd/FTPUploads/bin/
+/BrowserBackEnd/FTPUploads/obj/

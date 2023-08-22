@@ -1,0 +1,65 @@
+<div class="upload flex-column-center">
+  <div class="upload__content flex-column">
+    <input type="file" class="upload__file-input" (change)="handleFileSelectChange($event)" #fileInput />
+    <h2 class="upload__header">Upload file</h2>
+
+    <mat-form-field class="example-full-width upload__select-ip-container" appearance="fill">
+      <mat-label>Server IP address</mat-label>
+      <input matInput [(ngModel)]="httpService.apiUrl">
+    </mat-form-field>
+
+    <p class="upload__protocol-info">Upload file to the server using following protocol:</p>
+
+    <mat-radio-group  [(ngModel)]="selectedProtocol">
+      <mat-radio-button  class="upload__radio-websocket" value="WebSocket">WebSocket</mat-radio-button>
+      <mat-radio-button class="upload__radio-http mat-radio-button-with-margin" value="HTTP">HTTP</mat-radio-button>
+    </mat-radio-group>
+
+    <div *ngIf="selectedProtocol == 'HTTP'" class="upload__http-format-container">
+      <p class="upload__http-format">Select the upload format</p>
+      <mat-radio-group [(ngModel)]="httpSelectedDataUploadFormat">
+        <mat-radio-button class="upload__radio-http-base64" value="base64">Base64 string (json)</mat-radio-button>
+        <mat-radio-button class="upload__radio-http-array mat-radio-button-with-margin" value="numberArray">Number array (json)</mat-radio-button>
+        <mat-radio-button class="upload__radio-http-form-data mat-radio-button-with-margin" value="formData">Form-data</mat-radio-button>
+      </mat-radio-group>
+
+      <p class="upload__http-format">Select the upload body size</p>
+      <mat-radio-group [(ngModel)]="httpBodySize">
+        <mat-radio-button class="upload__radio-http-5kb" value="5000">5 KB</mat-radio-button>
+        <mat-radio-button class="upload__radio-http-50kb mat-radio-button-with-margin" value="50000">50 KB</mat-radio-button>
+        <mat-radio-button class="upload__radio-http-500kb mat-radio-button-with-margin" value="500000"> 500 KB</mat-radio-button>
+      </mat-radio-group>
+    </div>
+
+    <div *ngIf="selectedProtocol == 'WebSocket'" class="upload__websocket-format-container">
+      <p class="upload__http-format">Select the upload format</p>
+      <mat-radio-group [(ngModel)]="websocketSelectedDataUploadFormat">
+        <mat-radio-button class="upload__radio-radiowebsocket-string mat-radio-button-with-margin" value="string">String</mat-radio-button>
+        <mat-radio-button class="upload__radio-radiowebsocket-binary mat-radio-button-with-margin" value="binary">Binary</mat-radio-button>
+      </mat-radio-group>
+    </div>
+
+    <div class="upload__select-file-container">
+      <p class="upload__select-file-header">Select file to upload</p>
+      <div class="upload__select-file-input-container">
+        <div class="upload__selected-file-name-container">
+          <span class="upload__selected-file-name">{{selectedFileName}}</span>
+        </div>
+        <app-button text="Select file" (click)="handleFileSelectClick()"></app-button>
+        
+      </div>
+    </div>
+
+    <div class="upload__send-button-container">
+      <app-button id="upload__upload-button" text="Upload" type="wide" (click)="handleFileUploadStart()"></app-button>
+    </div>
+
+    <div *ngIf="uploadStatus != 'uploading' && uploadTime !== 0" class="upload__result-container">
+      <div class="upload__result-content-container">
+        <span class="upload__result">Uploaded file {{selectedFileName}} in <span id="upload__result-time">{{uploadTime}}</span>  seconds</span>
+      </div>
+     
+    </div>
+   
+  </div>
+</div>
