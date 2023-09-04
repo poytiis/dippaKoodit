@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
@@ -31,27 +32,25 @@ namespace BrowserBackEnd
                  })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    var useHTTPS = Environment.GetEnvironmentVariable("USE_HTTPS");
-                    if(useHTTPS != "true")
-                    {
-                        webBuilder.ConfigureKestrel(opt => {
-                            opt.ListenAnyIP(5000);
 
-                            opt.ListenAnyIP(5001, listenOptions =>
-                            {
-                                listenOptions.Protocols = HttpProtocols.Http1AndHttp2AndHttp3;
-                                listenOptions.UseHttps();
-                            });
-                        });
-                    }
-                    else
+                    var certPath = "C:\\Users\\OWNER\\dippa\\dippa-teemup\\BrowserBackEnd\\certificate\\localhost.pfx";
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                     {
-                        webBuilder.ConfigureKestrel(opt => {
-                            opt.ListenAnyIP(5000);                         
-                        });
+                        certPath = "/home/poytiis/certs/dippa.test.pfx";
                     }
+
+                    webBuilder.ConfigureKestrel(opt =>
+                    {
+                        opt.ListenAnyIP(5000);
+
+                        opt.ListenAnyIP(5001, listenOptions =>
+                        {
+                            listenOptions.Protocols = HttpProtocols.Http1AndHttp2AndHttp3;
+                            listenOptions.UseHttps(certPath);
+                        });
+                    });
+
                     webBuilder.UseStartup<Startup>();
-                })
-            ;
+                });
     }
 }

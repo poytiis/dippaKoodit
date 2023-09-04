@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.Json;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-var domain = "https://localhost:5001/";
+var domain = "https://localhost:443/";
 
 
 
@@ -122,9 +122,9 @@ async Task UploadFile(HttpClient client, string filePath, string fileName, strin
 }
 
 
-var fileName = "dummy.jpg";
-var filePath = "C:/renitaUploadData/" + fileName;
-var resultFilePath = "C:/Users/teemup/dippa/HTTPVersions.csv";
+var fileName = "image.jpg";
+var filePath = "C:\\Users\\OWNER\\dippa\\uploadData\\" + fileName;
+var resultFilePath = "C:\\Users\\OWNER\\dippa\\upload\\HTTPVersions.csv";
 
 var clients = new List<HttpClient> {
     new HttpClient()
@@ -137,7 +137,7 @@ var clients = new List<HttpClient> {
         DefaultRequestVersion = HttpVersion.Version20,
         DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact
     },
-     new HttpClient()
+    new HttpClient()
     {
         DefaultRequestVersion = HttpVersion.Version11,
         DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact

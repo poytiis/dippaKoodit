@@ -93,7 +93,7 @@ namespace BrowserBackEnd.Services
             var allBytes = Array.Empty<byte>();
             var fileCount = allFiles.Count();
 
-            for(var i = 1; i <= fileCount; i++)
+            for(var i = 0; i < fileCount; i++)
             {
                 var fileName = uploadFolder + finishUpload.FileName + "__"  + i.ToString();
                 Console.WriteLine(fileName);

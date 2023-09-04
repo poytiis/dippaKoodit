@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Open ports in ubuntu, ports need to be opened also in Azure nsg
-sudo ufw allow from any to any port 5000, 80 proto tcp
+sudo ufw allow  5000, 80
 
 # install .NET 5 sdk via snap
 sudo snap install dotnet-sdk --classic --channel=5.0
