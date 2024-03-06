@@ -20,10 +20,6 @@ namespace BrowserBackEnd.Hubs
             await Clients.All.SendAsync(WebSocketActions.MESSAGE_RECEIVED,  "dummy");
         }
 
-        public async Task Receive(string data)
-        {
-            Console.WriteLine(data);
-        }
 
         public void UploadFilePiece(string data)
         {

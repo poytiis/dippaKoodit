@@ -13,10 +13,11 @@ export class WebsocketService {
   private webSocketConnectionRx: WebSocketSubject<unknown> | null = null;
 
   private hubConnection: HubConnection | null = null;
-  private webSocketLibrary: 'signalR' | 'default' | 'RX' | 'notSelected' = 'signalR';
+  private webSocketLibrary: 'signalR' | 'default' | 'RX' | 'notSelected' = 'default';
 
   private waitForConnectionEstablished = 5;
-  public webSocketUrl = '20.55.51.145:5000';
+  // public webSocketUrl = 'dippa.test:5000';
+  public webSocketUrl = 'localhost:5000';
   public websocketHTTPUrl = 'http://' + this.webSocketUrl
   constructor() { }
 

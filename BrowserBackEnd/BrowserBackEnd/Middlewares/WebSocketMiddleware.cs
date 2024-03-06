@@ -26,9 +26,12 @@ namespace BrowserBackEnd.Midelwares
     {
         private readonly RequestDelegate _next;
         public int BinaryBlockSize { get; set; }
-        public WebSocketMiddleware(RequestDelegate next)
+        private readonly IConfiguration _configuration;
+        public WebSocketMiddleware(RequestDelegate next, IConfiguration configuraion)
         {
             _next = next;
+            BinaryBlockSize = 10485760;
+            _configuration = configuraion;
         }
 
         public async Task Invoke(HttpContext context)
@@ -51,27 +54,21 @@ namespace BrowserBackEnd.Midelwares
             }
 
         }
-        public static void Dummy(byte[] data)
-        {
-            var randomGuid = Guid.NewGuid().ToString();
-            var currentDate = DateTime.Now.Millisecond.ToString();
-            var _rootUploadPath = @"D:\dippa\upload";
-            var uploadPath = _rootUploadPath + "binary" + "/" + randomGuid + "__" + currentDate;
-
-            //File.WriteAllBytes(uploadPath, data);
-            Console.WriteLine("Dummuy");
-        }
 
         public async Task HandleWebSocket(WebSocket webSocket)
         {
             var configuration = new ConfigurationBuilder()
                     .AddJsonFile("appsettings.json")
-                    .AddJsonFile("appsettings.Secrets.json")
+                    .AddJsonFile("appsettings.Development.json")
+                    .AddJsonFile("appsettings.Secrets.json",
+                         optional: true,
+                         reloadOnChange: true)
                     .Build();
 
-            var uploadService = new UploadService(configuration);
+            var uploadService = new UploadService(_configuration);
+            var bufferSize = _configuration.GetValue<int>("WebSocketBufferSize");
 
-            var buffer = new byte[700000];
+            var buffer = new byte[bufferSize];
             var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 
             while (!result.CloseStatus.HasValue)
@@ -131,16 +128,14 @@ namespace BrowserBackEnd.Midelwares
                 }
                 else
                 {
-                    var binaryData = buffer.Take(BinaryBlockSize).ToArray();
+                    var binaryData = buffer.Take(result.Count).ToArray();
 
-                    //uploadService.StoreBinarydata(binaryData);
-                    Dummy(binaryData);
+                    uploadService.StoreBinarydata(binaryData);
+
                 }
 
                 Array.Clear(buffer, 0, buffer.Length);
 
-                //var dummyAnswer = Encoding.UTF8.GetBytes("{\"dummy\":1}");
-                //await webSocket.SendAsync(new ArraySegment<byte>(dummyAnswer), result.MessageType, true, CancellationToken.None);
               
                 result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             }

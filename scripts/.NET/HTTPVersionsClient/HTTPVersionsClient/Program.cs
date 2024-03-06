@@ -1,12 +1,15 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using System;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-var domain = "https://localhost:443/";
+var domain = "https://localhost:5001/";
+
+domain = "https://dippa.test:5001/";
 
 
 
@@ -21,7 +24,9 @@ async Task UploadFile(HttpClient client, string filePath, string fileName, strin
        Encoding.UTF8,
        "application/json");
 
-    var resp = await client.PostAsync(domain + "api/HTTP/StartUpload", jsonContent);
+    var url = domain + "api/HTTP/StartUpload";
+
+    var resp = await client.PostAsync(url, jsonContent);
     string body = await resp.Content.ReadAsStringAsync();
 
     byte[] buffer = new byte[readingBlockSize];
@@ -31,12 +36,7 @@ async Task UploadFile(HttpClient client, string filePath, string fileName, strin
     using (BufferedStream bs = new(fs))
     {
         while ((bytesRead = bs.Read(buffer, 0, readingBlockSize)) != 0)
-        {
-            noOfFiles++;
-            //Let's create a small size file using the data. Or Pass this data for any further processing.
-
-            //File.WriteAllBytes($"Test{noOfFiles}.txt", buffer);
-
+        {           
             if (method == "base64")
             {
                 var content = Convert.ToBase64String(buffer);
@@ -73,7 +73,6 @@ async Task UploadFile(HttpClient client, string filePath, string fileName, strin
                    "application/json");
 
                 var postRes = await client.PostAsync(domain + "api/HTTP/UploadFilePieceArray", postContent);
-                //Console.WriteLine(postRes.StatusCode);
             }
 
             else if (method == "byteArray")
@@ -90,7 +89,6 @@ async Task UploadFile(HttpClient client, string filePath, string fileName, strin
                   "application/json");
 
                 var postRes = await client.PostAsync(domain + "api/HTTP/UploadFilePieceByteArray", postContent);
-                //Console.WriteLine(postRes.StatusCode);
             }
 
             else if (method == "formData")
@@ -103,10 +101,10 @@ async Task UploadFile(HttpClient client, string filePath, string fileName, strin
                 multipartContent.Add(FileNameContent, "FileName");
                 multipartContent.Add(PieceNumberContent, "PieceNumber");
                 var postResponse = await client.PostAsync(domain + "api/HTTP/UploadFilePieceForm", multipartContent);
-                //Console.WriteLine(postResponse.StatusCode);
             }
-        }
 
+            noOfFiles++;
+        }
 
         using var finishContent = new StringContent(
                   JsonSerializer.Serialize(new
@@ -122,26 +120,28 @@ async Task UploadFile(HttpClient client, string filePath, string fileName, strin
 }
 
 
-var fileName = "image.jpg";
+var fileName = "dummy10M.txt";
 var filePath = "C:\\Users\\OWNER\\dippa\\uploadData\\" + fileName;
+var fileSize = new FileInfo(filePath).Length;
 var resultFilePath = "C:\\Users\\OWNER\\dippa\\upload\\HTTPVersions.csv";
 
 var clients = new List<HttpClient> {
-    new HttpClient()
-    {
-        DefaultRequestVersion = HttpVersion.Version30,
-        DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact
-    },
-    new HttpClient()
-    {
-        DefaultRequestVersion = HttpVersion.Version20,
-        DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact
-    },
+  
     new HttpClient()
     {
         DefaultRequestVersion = HttpVersion.Version11,
         DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact
     },
+    //   new HttpClient()
+    // {
+    //     DefaultRequestVersion = HttpVersion.Version30,
+    //     DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact
+    // },
+    // new HttpClient()
+    // {
+    //     DefaultRequestVersion = HttpVersion.Version20,
+    //     DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact
+    // },
 
 };
 
@@ -151,12 +151,14 @@ var clients = new List<HttpClient> {
 //    DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact
 //};
 
-var blockSize = 1048576;
-var csvData = "blockSize,bodyForm,HTTPVersion,time\n";
+var blockSize = 10485760;
+var csvData = "blockSize,bodyForm,HTTPVersion,time,fileSize\n";
 
 var bodyForms = new List<string> { "formData", "base64" , "byteArray" };
 
-foreach(var httpClient in clients)
+bodyForms = new List<string> { "formData" };
+
+foreach (var httpClient in clients)
 {
     foreach (var form in bodyForms)
     {
@@ -164,7 +166,7 @@ foreach(var httpClient in clients)
         await UploadFile(httpClient, filePath, fileName, form, blockSize);
         var endtTime = DateTime.Now;
         var timeDiff = endtTime - startTime;
-        csvData += blockSize.ToString() + "," + form + "," + httpClient.DefaultRequestVersion.ToString() + "," + timeDiff.ToString() + "\n";
+        csvData += blockSize.ToString() + "," + form + "," + httpClient.DefaultRequestVersion.ToString() + "," + timeDiff.ToString() + ","+ fileSize.ToString() + "\n";
     }
 }
 

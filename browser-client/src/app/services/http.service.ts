@@ -8,8 +8,8 @@ export class HttpService {
   public apiUrl: string;
 
   constructor(private http: HttpClient) {
-    const azureUrl = 'http://20.55.51.145:5000/api/HTTP/';
-    const localUrl = 'http://localhost:50765/api/HTTP/'
+    const azureUrl = 'http://dippa.test/api/HTTP/';
+    const localUrl = 'http://localhost:5000/api/HTTP/'
     this.apiUrl = azureUrl;
   }
 

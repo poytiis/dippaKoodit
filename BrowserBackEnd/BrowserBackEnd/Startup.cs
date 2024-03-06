@@ -50,11 +50,11 @@ namespace BrowserBackEnd
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseWebSockets();
-            var useRawWbsockets = false;
+            
+            var useRawWbsockets = true;
             if(useRawWbsockets)
             {
-               
+                app.UseWebSockets();
                 app.UseMiddleware<WebSocketMiddleware>();
             }
 

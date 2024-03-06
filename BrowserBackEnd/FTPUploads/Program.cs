@@ -7,6 +7,11 @@ using Renci.SshNet;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Net.WebSockets;
+using System.Threading;
+using System.Text;
+using Renci.SshNet.Messages;
+using System.Net.Http;
 
 namespace FTPUploads
 {
@@ -18,10 +23,12 @@ namespace FTPUploads
 
     class Program
     {
-        private static readonly string _serverIP = "52.190.63.78";
-        private static readonly string _averageResultFilePath = @"D:\dippa-teemup\BrowserBackEnd\FTPUploads\ftpUploadTimesAverage.csv";
-        private static readonly string _resultFilePath = @"D:\dippa-teemup\BrowserBackEnd\FTPUploads\ftpUploadTimes.csv";
-        private static readonly int _uploadTimes = 5;
+        private static readonly string _serverIP = "20.101.97.117";
+        private static readonly string _serverDomainName = "dippa.test:5000";
+        private static readonly string _serverDomainNameSecure = "dippa.test:5001";
+        private static readonly string _averageResultFilePath = @"C:\Users\OWNER\dippa\dippa-teemup\BrowserBackEnd\FTPUploads\ftpUploadTimesAverage.csv";
+        private static readonly string _resultFilePath = @"C:\Users\OWNER\dippa\dippa-teemup\BrowserBackEnd\FTPUploads\ftpUploadTimes.csv";
+        private static readonly int _uploadTimes = 1;
 
         private static string GenerateRandomFileName(string filePath)
         {
@@ -36,18 +43,28 @@ namespace FTPUploads
             
             var fileSize = new FileInfo(filePath).Length;
             var randomFileName = GenerateRandomFileName(filePath);
-            
+
+            var secretJsonPath = @"C:\Users\OWNER\dippa\dippa-teemup\BrowserBackEnd\FTPUploads\secrets.json";
+            using var reader = new StreamReader(secretJsonPath);
+            var jsonString = reader.ReadToEnd();
+
+            var credentials = JsonSerializer.Deserialize<SFTPCredentials>(jsonString);
+
             var startTime = DateTime.UtcNow;
 
-            using var client = new FtpClient(_serverIP);
+            using var client = new FtpClient(_serverIP, credentials.SFTPUser, credentials.SFTPPass);
             if(useFTPS)
             {
                 client.EncryptionMode = FtpEncryptionMode.Auto;
                 client.ValidateAnyCertificate = true;
             }
+            else
+            {
+                client.EncryptionMode = FtpEncryptionMode.None;
+            }
             
             client.Connect();
-            client.SetWorkingDirectory("upload");
+            client.SetWorkingDirectory("files");
             client.UploadFile(filePath, randomFileName);
 
             var endTime = DateTime.UtcNow;
@@ -63,7 +80,7 @@ namespace FTPUploads
         private static string SFTPUpload(string filePath)
         {
             var randomFileName = GenerateRandomFileName(filePath);
-            var secretJsonPath = @"D:\dippa-teemup\BrowserBackEnd\FTPUploads\secrets.json";
+            var secretJsonPath = @"C:\Users\OWNER\dippa\dippa-teemup\BrowserBackEnd\FTPUploads\secrets.json";
             using var reader = new StreamReader(secretJsonPath);
             var jsonString = reader.ReadToEnd();
 
@@ -85,6 +102,57 @@ namespace FTPUploads
             var filePathSplit = filePath.Split('/');
 
             return protocolName + "," + filePathSplit[^1] + "," + fileSize.ToString() + "," + uploadTime.ToString(CultureInfo.InvariantCulture) + ",C#\n";
+        }
+
+        private async static Task<string> WebsocketUpload(string filePath)
+        {
+            var startTime = DateTime.UtcNow;
+            var fileSize = new FileInfo(filePath).Length;
+            var filePathSplit = filePath.Split('/');
+            double uploadTime = 0;
+            using (var ws = new ClientWebSocket())
+            {
+                await ws.ConnectAsync(new Uri("ws://" + _serverDomainName), CancellationToken.None);
+                // var byteArray = Encoding.ASCII.GetBytes("asdasdasdasd");
+                var fileBytes = File.ReadAllBytes(filePath);
+                await ws.SendAsync(fileBytes, WebSocketMessageType.Binary, true, CancellationToken.None);
+                var endTime = DateTime.UtcNow;
+                uploadTime = (endTime - startTime).TotalSeconds;
+
+                await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
+               
+            }
+            return "WebSocket" + "," + filePathSplit[^1] + "," + fileSize.ToString() + "," + uploadTime.ToString(CultureInfo.InvariantCulture) + ",C#\n";
+        }
+
+        private async static Task<string> HTTPUpload(string filePath, bool useHTTPS = false)
+        {
+            var startTime = DateTime.UtcNow;
+            var fileSize = new FileInfo(filePath).Length;
+            var filePathSplit = filePath.Split('/');
+
+            using var client = new HttpClient();
+            var buffer = File.ReadAllBytes(filePath);
+
+            var multipartContent = new MultipartFormDataContent();
+            var byteArrayContent = new ByteArrayContent(buffer);
+            //var FileNameContent = new StringContent("Image");
+            //var PieceNumberContent = new StringContent("1");
+            multipartContent.Add(byteArrayContent, "PieceData", "filename");
+            //multipartContent.Add(FileNameContent, "FileName");
+            //multipartContent.Add(PieceNumberContent, "PieceNumber");
+            var url = "http://" + _serverDomainName + "/api/HTTP/UploadFilePieceForm";
+            var protocol = "HTTP";
+            if (useHTTPS)
+            {
+                url = "https://" + _serverDomainNameSecure + "/api/HTTP/UploadFilePieceForm";
+                protocol = "HTTPS";
+            }
+            var postResponse = await client.PostAsync(url, multipartContent);
+            var endTime = DateTime.UtcNow;
+            var uploadTime = (endTime - startTime).TotalSeconds;
+            return protocol + "," + filePathSplit[^1] + "," + fileSize.ToString() + "," + uploadTime.ToString(CultureInfo.InvariantCulture) + ",C#\n";
+
         }
 
         private static void CalcAverageTimes()
@@ -129,9 +197,10 @@ namespace FTPUploads
 
         }
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            var filePaths = new List<string>{ "D:/dippa/uploadData/kilo.txt", "D:/dippa/uploadData/mega.txt", "D:/dippa/uploadData/tenMega.txt" };
+            var filePaths = new List<string>{ @"C:/Users/OWNER/dippa/uploadData/image1M.jpg"};
+            // var filePaths = new List<string>{ @"C:/Users/OWNER/dippa/uploadData/dummy10M.txt", @"C:/Users/OWNER/dippa/uploadData/dummy100M.txt" };
 
             var csvRows = "protocol,file_name,file_size,upload_time,client\n";
 
@@ -141,14 +210,18 @@ namespace FTPUploads
                 File.Delete(_resultFilePath);
             }
 
-            FTPUpload(filePaths[0], false);
+
             foreach (var path in filePaths)
             {
                 for (var i = 0; i < _uploadTimes; i++)
                 {
-                    csvRows += FTPUpload(path, false);
-                    csvRows += FTPUpload(path, true);
-                    csvRows += SFTPUpload(path);
+                    csvRows += await HTTPUpload(path);
+                    //csvRows += await HTTPUpload(path, true);
+                    //csvRows += await WebsocketUpload(path);
+                    //csvRows += FTPUpload(path, false);
+                    //csvRows += FTPUpload(path, true);
+                    //csvRows += SFTPUpload(path);
+
                 }
             }
 

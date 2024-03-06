@@ -19,7 +19,7 @@ export class UploadViewComponent implements OnInit {
   public uploadStatus: string = 'notUploading';
   public uploadFilePieceNumber: number = 0;
   public selectedFileName: string = 'No file selected';
-  private filePieceSize: number = 28000;
+  private filePieceSize: number = 10485760;
   public httpSelectedDataUploadFormat: 'notSelected' | 'base64' | 'numberArray' | 'formData' = 'notSelected';
   public websocketSelectedDataUploadFormat: 'notSelected' | 'string' | 'binary' = 'notSelected';
   public httpBodySize: 'notSelected' | '5000' | '50000' | '500000' = 'notSelected';
