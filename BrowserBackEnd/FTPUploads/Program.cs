@@ -12,6 +12,9 @@ using System.Threading;
 using System.Text;
 using Renci.SshNet.Messages;
 using System.Net.Http;
+using WebDav;
+using WinSCP;
+using System.Net;
 
 namespace FTPUploads
 {
@@ -104,6 +107,34 @@ namespace FTPUploads
             return protocolName + "," + filePathSplit[^1] + "," + fileSize.ToString() + "," + uploadTime.ToString(CultureInfo.InvariantCulture) + ",C#\n";
         }
 
+        private async static Task<string> WebDavUpload(string filePath)
+        {
+            var secretJsonPath = @"C:\Users\OWNER\dippa\dippa-teemup\BrowserBackEnd\FTPUploads\secrets.json";
+            using var reader = new StreamReader(secretJsonPath);
+            var jsonString = reader.ReadToEnd();
+
+            var credentials = JsonSerializer.Deserialize<SFTPCredentials>(jsonString);
+
+
+            var startTime = DateTime.UtcNow;
+            var clientParams = new WebDavClientParams 
+            { 
+                BaseAddress = new Uri("http://dippa.test/webdav/"),
+                Credentials = new NetworkCredential(credentials.SFTPUser, credentials.SFTPPass)
+            };
+            using (var client = new WebDavClient(clientParams))
+            {
+                await client.PutFile("webdav_image1M.png", new FileStream(filePath, FileMode.Open));
+            }
+            var endTime = DateTime.UtcNow;
+            var uploadTime = (endTime - startTime).TotalSeconds;
+            var fileSize = new FileInfo(filePath).Length;
+            var protocolName = "WebDav";
+            var filePathSplit = filePath.Split('/');
+            return protocolName + "," + filePathSplit[^1] + "," + fileSize.ToString() + "," + uploadTime.ToString(CultureInfo.InvariantCulture) + ",C#\n";
+        }
+
+
         private async static Task<string> WebsocketUpload(string filePath)
         {
             var startTime = DateTime.UtcNow;
@@ -113,7 +144,6 @@ namespace FTPUploads
             using (var ws = new ClientWebSocket())
             {
                 await ws.ConnectAsync(new Uri("ws://" + _serverDomainName), CancellationToken.None);
-                // var byteArray = Encoding.ASCII.GetBytes("asdasdasdasd");
                 var fileBytes = File.ReadAllBytes(filePath);
                 await ws.SendAsync(fileBytes, WebSocketMessageType.Binary, true, CancellationToken.None);
                 var endTime = DateTime.UtcNow;
@@ -210,14 +240,19 @@ namespace FTPUploads
                 File.Delete(_resultFilePath);
             }
 
+           // await HTTPUpload(filePaths[0]);
+
 
             foreach (var path in filePaths)
             {
                 for (var i = 0; i < _uploadTimes; i++)
                 {
-                    csvRows += await HTTPUpload(path);
                     //csvRows += await HTTPUpload(path, true);
+                    //csvRows += await HTTPUpload(path);
+
                     //csvRows += await WebsocketUpload(path);
+                    csvRows += await WebDavUpload(path);
+
                     //csvRows += FTPUpload(path, false);
                     //csvRows += FTPUpload(path, true);
                     //csvRows += SFTPUpload(path);

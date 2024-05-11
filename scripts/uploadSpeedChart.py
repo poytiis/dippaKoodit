@@ -9,14 +9,14 @@ def read_csv_file(file_path: str):
   for line in lines:
     line_split = line.split(',')
     protocol = line_split[0]
-    increasement = float(line_split[1].strip()) * 100
+    time = float(line_split[3].strip())
     dict_key = protocol
-    results[dict_key] = {'increasement': increasement}
+    results[dict_key] = {'time': time}
   return results
 
 
 def main():
-  csv_files = ['wireShark1M.csv']
+  csv_files = ['uploadSpeedTimes.csv']
   csv_data = []
   for file in csv_files:
     csv_results = read_csv_file(file)
@@ -28,10 +28,10 @@ def main():
 
   for key in csv_data[0]:
     print(key)
-    bar_values.append(csv_data[0][key]['increasement'])
+    bar_values.append(csv_data[0][key]['time'])
 
-  # print(csv_data)
-  # print(bar_values)
+  print(csv_data)
+  print(bar_values)
   # return
   X = np.arange(1)
   pl1 = plt.bar(X + bar_width, bar_values[0], color = 'b', width = 0.35)
@@ -44,12 +44,12 @@ def main():
 
 
   plt.xlabel('Protokolla',  fontsize = 14)
-  plt.ylabel('kasvuprosentti (%)', fontsize = 14)
+  plt.ylabel('aika (s)', fontsize = 14)
   plt.xticks([r + bar_width for r in range(7)],
           ['HTTP', 'WebSocket', 'FTP', 'FTPS', 'SFTP', 'HTTPS', 'WebDav'])
-  plt.title('Tiedoston kasvuprosentti eri tiedonsiirtoprotokollilla')
+  plt.title('Tiedoston siirtoaika eri tiedonsiirtoprotokollilla')
 
-  plt.savefig('wireSharResults.png')
+  plt.savefig('uploadSpeedResults.png')
   
 
 main()
