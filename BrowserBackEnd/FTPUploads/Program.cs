@@ -229,7 +229,7 @@ namespace FTPUploads
 
         static async Task Main(string[] args)
         {
-            var filePaths = new List<string>{ @"C:/Users/OWNER/dippa/uploadData/image1M.jpg"};
+            var filePaths = new List<string>{ @"C:/Users/OWNER/dippa/uploadData/dummy100M.txt"};
             // var filePaths = new List<string>{ @"C:/Users/OWNER/dippa/uploadData/dummy10M.txt", @"C:/Users/OWNER/dippa/uploadData/dummy100M.txt" };
 
             var csvRows = "protocol,file_name,file_size,upload_time,client\n";
@@ -251,9 +251,9 @@ namespace FTPUploads
                     //csvRows += await HTTPUpload(path);
 
                     //csvRows += await WebsocketUpload(path);
-                    csvRows += await WebDavUpload(path);
+                    //csvRows += await WebDavUpload(path);
 
-                    //csvRows += FTPUpload(path, false);
+                    csvRows += FTPUpload(path, false);
                     //csvRows += FTPUpload(path, true);
                     //csvRows += SFTPUpload(path);
 

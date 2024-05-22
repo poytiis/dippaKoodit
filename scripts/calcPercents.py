@@ -1,7 +1,11 @@
-base = 1033414
+base_1M = 1033414
 
-value = 1079603
+base_100M = 104857600
 
-diff = (value - base) / base
+base_20M = 20048576
+
+value = 109097868
+
+diff = (value - base_100M) / base_100M
 
 print(diff)
