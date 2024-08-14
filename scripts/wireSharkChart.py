@@ -47,9 +47,9 @@ def main():
   plt.ylabel('kasvuprosentti (%)', fontsize = 14)
   plt.xticks([r + bar_width for r in range(7)],
           ['HTTP', 'WebSocket', 'FTP', 'FTPS', 'SFTP', 'HTTPS', 'WebDav'])
-  plt.title('Tiedoston kasvuprosentti eri tiedonsiirtoprotokollilla')
+  plt.title('Tiedoston (1 M) kasvuprosentti eri tiedonsiirtoprotokollilla')
 
-  plt.savefig('wireSharResults.png')
+  plt.savefig('wireSharResults1M.png')
   
 
 main()
