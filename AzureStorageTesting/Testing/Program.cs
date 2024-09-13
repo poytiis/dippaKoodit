@@ -7,78 +7,38 @@ var coolPath = configLines[1];
 var premiumPath = configLines[2];
 var storeTimes = Int32.Parse(configLines[3]);
 var resultsPath = configLines[4];
+var hotPath = configLines[5];
+var transactionPath = configLines[6];
 
 var fileBytes = File.ReadAllBytes(testFile);
 var coolResults = RunStoreTest(storeTimes, fileBytes, coolPath);
 var premiumResults = RunStoreTest(storeTimes, fileBytes, premiumPath);
+var hotResults = RunStoreTest(storeTimes, fileBytes, hotPath);
+var transactionResults = RunStoreTest(storeTimes, fileBytes, transactionPath);
 
-//for (int i = 0; i < storeTimes + 1; i++)
-//{
-//    var fileName = "cool" + i.ToString() + ".txt";
-//    var path = Path.Combine(coolPath, fileName);
-//    var startTime = DateTime.Now;
-//    File.WriteAllBytes(path, fileBytes);
-//    var endTime = DateTime.Now;
-//    var writeTime = (endTime - startTime).TotalMilliseconds;
-//    if (i != 0)
-//    {
-//        coolResults.Add(writeTime);
-//    }
-    
-//}
-
-
-//for (int i = 0; i < storeTimes; i++)
-//{
-//    var fileName = "premium" + i.ToString() + ".txt";
-//    var path = Path.Combine(premiumPath, fileName);
-//    var startTime = DateTime.Now;
-//    File.WriteAllBytes(path, fileBytes);
-//    var endTime = DateTime.Now;
-//    var writeTime = (endTime - startTime).TotalMilliseconds;
-//    premiumResults.Add(writeTime);
-//}
-
-
-//Console.WriteLine(coolResults[0].ToString());
-//Console.WriteLine(premiumResults[0].ToString());
-
-//DirectoryInfo di = new (coolPath);
-
-//foreach (FileInfo file in di.GetFiles())
-//{
-//    file.Delete();
-//}
-
-//di = new(premiumPath);
-
-//foreach (FileInfo file in di.GetFiles())
-//{
-//    file.Delete();
-//}
-
-//var medianCool = coolResults.Aggregate(0.0, (acc, x) => acc + x) / storeTimes;
-//var medianPremium = premiumResults.Aggregate(0.0, (acc, x) => acc + x) / storeTimes;
 
 var medianCool = CalcMedian(coolResults, storeTimes);
 var medianPremium = CalcMedian(premiumResults, storeTimes);
-
-//var varianceCool = coolResults.Aggregate(0.0, (acc, x) => acc + Math.Pow((x - medianCool), 2)) / storeTimes;
-//var devitationCool = Math.Sqrt(varianceCool);
+var medianHot = CalcMedian(hotResults, storeTimes);
+var medianTransaction = CalcMedian(transactionResults, storeTimes);
 
 var devitationCool = CalcDeviation(coolResults, storeTimes, medianCool);
 var devitationPremium = CalcDeviation(premiumResults, storeTimes, medianPremium);
-
-//var variancePremium = premiumResults.Aggregate(0.0, (acc, x) => acc + Math.Pow((x - medianPremium), 2)) / storeTimes;
-//var devitationPremium = Math.Sqrt(variancePremium);
+var devitationHot = CalcDeviation(hotResults, storeTimes, medianHot);
+var devitationTransaction = CalcDeviation(transactionResults, storeTimes, medianTransaction);
 
 
 Console.WriteLine("Median cool: " + medianCool);
 Console.WriteLine("Deviation cool: " + devitationCool);
 
-
 Console.WriteLine("Median premium: " + medianPremium);
 Console.WriteLine("Deviation premium: " + devitationPremium);
+
+Console.WriteLine("Median hot: " + medianHot);
+Console.WriteLine("Deviation hot: " + devitationHot);
+
+Console.WriteLine("Median transaction: " + medianTransaction);
+Console.WriteLine("Deviation transaction: " + devitationTransaction);
 
 DateTimeOffset dto = new DateTimeOffset(DateTime.UtcNow);
 string unixTime = dto.ToUnixTimeSeconds().ToString();
@@ -86,10 +46,18 @@ string unixTime = dto.ToUnixTimeSeconds().ToString();
 
 var coolResultFileName = "coolResults-" + unixTime + ".txt";
 var premiumResultFileName = "premiumResults-" + unixTime + ".txt";
+var hotResultFileName = "hotResults-" + unixTime + ".txt";
+var transactionResultFileName = "transactionResults-" + unixTime + ".txt";
+
 var coolResultsRow = "median: " + medianCool.ToString() + ", deviation: " + devitationCool.ToString() + "\n";
 var premiumResultsRow = "median: " + medianPremium.ToString() + ", deviation: " + devitationPremium.ToString() + "\n";
+var hotResultsRow = "median: " + medianHot.ToString() + ", deviation: " + devitationHot.ToString() + "\n";
+var transactionResultsRow = "median: " + medianTransaction.ToString() + ", deviation: " + devitationTransaction.ToString() + "\n";
+
 StoreResults(coolResults, resultsPath + coolResultFileName, coolResultsRow);
 StoreResults(premiumResults, resultsPath + premiumResultFileName, premiumResultsRow);
+StoreResults(hotResults, resultsPath + hotResultFileName, hotResultsRow);
+StoreResults(transactionResults, resultsPath + transactionResultFileName, transactionResultsRow);
 
 static void StoreResults( List<double> results, string path, string calcResults)
 {
