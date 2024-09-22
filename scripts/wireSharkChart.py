@@ -16,7 +16,7 @@ def read_csv_file(file_path: str):
 
 
 def main():
-  csv_files = ['wireShark1M.csv']
+  csv_files = ['wireShark200M.csv']
   csv_data = []
   for file in csv_files:
     csv_results = read_csv_file(file)
@@ -47,9 +47,9 @@ def main():
   plt.ylabel('kasvuprosentti (%)', fontsize = 14)
   plt.xticks([r + bar_width for r in range(7)],
           ['HTTP', 'WebSocket', 'FTP', 'FTPS', 'SFTP', 'HTTPS', 'WebDav'])
-  plt.title('Tiedoston (1 M) kasvuprosentti eri tiedonsiirtoprotokollilla')
+  plt.title('Tiedoston (200 MB) kasvuprosentti eri tiedonsiirtoprotokollilla')
 
-  plt.savefig('wireSharResults1M.png')
+  plt.savefig('wireSharResults200M.png')
   
 
 main()
