@@ -166,11 +166,8 @@ namespace FTPUploads
 
             var multipartContent = new MultipartFormDataContent();
             var byteArrayContent = new ByteArrayContent(buffer);
-            //var FileNameContent = new StringContent("Image");
-            //var PieceNumberContent = new StringContent("1");
+
             multipartContent.Add(byteArrayContent, "PieceData", "filename");
-            //multipartContent.Add(FileNameContent, "FileName");
-            //multipartContent.Add(PieceNumberContent, "PieceNumber");
             var url = "http://" + _serverDomainName + "/api/HTTP/UploadFilePieceForm";
             var protocol = "HTTP";
             if (useHTTPS)
@@ -229,34 +226,30 @@ namespace FTPUploads
 
         static async Task Main(string[] args)
         {
-            var filePaths = new List<string>{ @"C:/Users/OWNER/dippa/uploadData/dummy100M.txt"};
-            // var filePaths = new List<string>{ @"C:/Users/OWNER/dippa/uploadData/dummy10M.txt", @"C:/Users/OWNER/dippa/uploadData/dummy100M.txt" };
-
+            var filePaths = new List<string>{ @"C:/Users/OWNER/dippa/uploadData/dummy10M.txt", @"C:/Users/OWNER/dippa/uploadData/dummy100M.txt" };
             var csvRows = "protocol,file_name,file_size,upload_time,client\n";
-
             
             if (File.Exists(_resultFilePath))
             {
                 File.Delete(_resultFilePath);
             }
 
-           // await HTTPUpload(filePaths[0]);
+           await HTTPUpload(filePaths[0]);
 
 
             foreach (var path in filePaths)
             {
                 for (var i = 0; i < _uploadTimes; i++)
                 {
-                    //csvRows += await HTTPUpload(path, true);
-                    //csvRows += await HTTPUpload(path);
+                    csvRows += await HTTPUpload(path, true);
+                    csvRows += await HTTPUpload(path);
 
-                    //csvRows += await WebsocketUpload(path);
-                    //csvRows += await WebDavUpload(path);
+                    csvRows += await WebsocketUpload(path);
+                    csvRows += await WebDavUpload(path);
 
                     csvRows += FTPUpload(path, false);
-                    //csvRows += FTPUpload(path, true);
-                    //csvRows += SFTPUpload(path);
-
+                    csvRows += FTPUpload(path, true);
+                    csvRows += SFTPUpload(path);
                 }
             }
 

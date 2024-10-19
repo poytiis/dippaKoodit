@@ -194,8 +194,7 @@ namespace BrowserBackEnd.Services
             if(id != 0)
             {
                 comm.Parameters.AddWithValue("@id", id);
-            }
-            
+            }        
             try
             {
                 await comm.ExecuteNonQueryAsync();
@@ -224,7 +223,6 @@ namespace BrowserBackEnd.Services
             {
                 Console.WriteLine(ex.Message);
             }
-
         }
 
         private async Task InitSQLAndFileSystem()
@@ -243,7 +241,6 @@ namespace BrowserBackEnd.Services
             var smallFile = await File.ReadAllBytesAsync(smallFilePath);
             var mediumFile = await File.ReadAllBytesAsync(mediumFilePath);
             var largeFile = await File.ReadAllBytesAsync(largeFilePath);
-
 
             var storePathRoot = _configuraion.GetValue<string>("SQLFileSystemStoreRoot");
             var random = new Random();
@@ -267,7 +264,6 @@ namespace BrowserBackEnd.Services
                 var fileLink = storePathRoot + fileName;
                 await SQLStoreFileWithLink(i, fileLink, fileName);
             }
-
         }
 
         private async Task SQLReadBlobFiles()
@@ -283,7 +279,6 @@ namespace BrowserBackEnd.Services
             var reader = await comm.ExecuteReaderAsync();
             while(reader.Read())
             {
-                // var blob = reader["fileData"];
                 var bytes = new byte[1048];
                 reader.GetBytes(reader.GetOrdinal("fileData"), 0, bytes, 0, 1048);
                 Console.WriteLine(bytes[0]);
@@ -328,9 +323,7 @@ namespace BrowserBackEnd.Services
 
         private async Task<string> SQLWriteAndDeleteFiles(string tableName)
         {
-            var random = new Random();
-           
-            
+            var random = new Random();          
 
             var smallFilePath = _configuraion.GetValue<string>("SmallFilepath");
             var mediumFilePath = _configuraion.GetValue<string>("MediumFilepath");
@@ -339,7 +332,6 @@ namespace BrowserBackEnd.Services
             var smallFile = await File.ReadAllBytesAsync(smallFilePath);
             var mediumFile = await File.ReadAllBytesAsync(mediumFilePath);
             var largeFile = await File.ReadAllBytesAsync(largeFilePath);
-
 
             var storePathRoot = _configuraion.GetValue<string>("SQLFileSystemStoreRoot");
 
@@ -353,10 +345,8 @@ namespace BrowserBackEnd.Services
             {
                 var fileLink = storePathRoot + fileName;
                 await SQLStoreFileWithLink(randomId, fileLink, fileName);
-
                 await File.WriteAllBytesAsync(fileLink, smallFile);
             }
-           
 
             using var connection = new MySqlConnection(_SQLConnectionString);
             connection.Open();
@@ -370,8 +360,6 @@ namespace BrowserBackEnd.Services
                 File.Delete(storePathRoot + fileName);
             }
 
-
-
             query.ExecuteNonQuery();
 
             return "";
@@ -379,8 +367,6 @@ namespace BrowserBackEnd.Services
 
         public async Task RunStoreLargeFilesInSQLVersusFilesystem()
         {
-
-            //await InitSQLAndFileSystem();
             var resultsFile = "operation,type,time,fileSize\n";
             var fileSize = 1048;
 
@@ -471,11 +457,6 @@ namespace BrowserBackEnd.Services
             resultsFile += "WriteAndDelete,link" + ReadAndWriteTaskTime.TotalSeconds.ToString() + "," + fileSize + "\n";
 
             Console.WriteLine(resultsFile);
-
-
-
-
-
         }
     }
 }

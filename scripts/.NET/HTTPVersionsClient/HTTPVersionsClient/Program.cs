@@ -1,5 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
-using System;
+﻿using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -8,9 +7,7 @@ using System.Text.Json;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 var domain = "https://localhost:5001/";
-
 domain = "https://dippa.test:5001/";
-
 
 
 async Task UploadFile(HttpClient client, string filePath, string fileName, string method, int readingBlockSize = 1048576)
@@ -132,24 +129,18 @@ var clients = new List<HttpClient> {
         DefaultRequestVersion = HttpVersion.Version11,
         DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact
     },
-    //   new HttpClient()
-    // {
-    //     DefaultRequestVersion = HttpVersion.Version30,
-    //     DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact
-    // },
-    // new HttpClient()
-    // {
-    //     DefaultRequestVersion = HttpVersion.Version20,
-    //     DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact
-    // },
+      new HttpClient()
+    {
+        DefaultRequestVersion = HttpVersion.Version30,
+        DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact
+    },
+    new HttpClient()
+    {
+        DefaultRequestVersion = HttpVersion.Version20,
+        DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact
+    }
 
 };
-
-//using var client = new HttpClient()
-//{
-//    DefaultRequestVersion = HttpVersion.Version30,
-//    DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact
-//};
 
 var blockSize = 10485760;
 var csvData = "blockSize,bodyForm,HTTPVersion,time,fileSize\n";
